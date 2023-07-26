@@ -1,0 +1,29 @@
+{
+    "name": "weird-salads",
+    "version": "1.0.0",
+    "description": "",
+    "main": "app/index.js",
+    "scripts": {
+        "dev": "next dev",
+        "build": "next build",
+        "start": "next start"
+    },
+    "author": "Brian Shannon",
+    "private": true,
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/codemeasandwich/saladsweird.git"
+    },
+    "keywords": [],
+    "bugs": {
+        "url": "https://github.com/codemeasandwich/saladsweird/issues"
+    },
+    "homepage": "https://github.com/codemeasandwich/saladsweird#readme",
+    "dependencies": {
+        "next": "13.4.12",
+        "react": "18.2.0",
+        "react-dom": "18.2.0",
+        "mongodb": "5.7.0",
+        "mongoose": "7.4.1"
+    }
+}
