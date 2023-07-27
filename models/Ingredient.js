@@ -5,20 +5,15 @@ const IngredientSchema = new mongoose.Schema({
         type: String,
         required: [true, 'Please add a name'],
         unique: true,
-        trim: true,
-        maxlength: [50, 'Name cannot be more than 50 characters']
+        trim: true
     },
-    costPerUnit: {
+    cost: {
         type: Number,
         required: [true, 'Please add a cost per unit']
     },
-    quantity: {
+    unit: {
         type: Number,
         default: 0
-    },
-    location: {
-        type: String,
-        required: [true, 'Please add a location']
     }
 });
 
