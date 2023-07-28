@@ -25,8 +25,7 @@ const LocationSchema = new mongoose.Schema({
         },
         price: {
             type: Number,
-            required: [true, 'Each menu item needs a price'],
-            unique: true
+            required: [true, 'Each menu item needs a price']
         },
         extras: {
             type: Boolean,

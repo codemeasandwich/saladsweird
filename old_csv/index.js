@@ -18,7 +18,7 @@ function csvs() {
 
             // Read each CSV file
             csvFiles.forEach(file => {
-                console.log(`${folder}/${file}`)
+                console.log(` -> ${folder}/${file}`)
                 readCSV(`${folder}/${file}`)
                     .then(data => {
                         result[file.split('.')[0]] = data;

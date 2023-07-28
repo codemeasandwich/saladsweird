@@ -12,8 +12,8 @@ const IngredientSchema = new mongoose.Schema({
         required: [true, 'Please add a cost per unit']
     },
     unit: {
-        type: Number,
-        default: 0
+        type: String,
+        required: [true, 'what measurement unit should be used?']
     }
 });
 

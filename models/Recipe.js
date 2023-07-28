@@ -7,7 +7,10 @@ const RecipeSchema = new mongoose.Schema({
         trim: true
     },
     items: [{
-        quantity: Number,
+        quantity: {
+            type: Number,
+            required: true
+        },
         ingredient: {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'Ingredient',
@@ -16,4 +19,4 @@ const RecipeSchema = new mongoose.Schema({
     }]
 });
 
-module.exports = mongoose.models.Recipe || mongoose.model('Recipe', ReportSchema);
+module.exports = mongoose.models.Recipe || mongoose.model('Recipe', RecipeSchema);
