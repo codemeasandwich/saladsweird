@@ -9,6 +9,7 @@ const InventoryMovementsPage = () => {
     const [quantity, setQuantity] = useState('');
 
     useEffect(() => {
+        return;
         fetch('/api/inventoryMovements')
             .then(response => response.json())
             .then(data => setInventoryMovements(data.data));

@@ -1,7 +1,9 @@
 import dbConnect from '../../utils/dbConnect';
-import MenuItem from '../../models/MenuItem';
+//import MenuItem from '../../models/MenuItem';
 
 export default async (req, res) => {
+
+    return;
     const { method } = req;
 
     await dbConnect();

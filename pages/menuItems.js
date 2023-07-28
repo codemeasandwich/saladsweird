@@ -8,6 +8,7 @@ const MenuItemsPage = () => {
     const [location, setLocation] = useState('');
 
     useEffect(() => {
+        return;
         fetch('/api/menuItems')
             .then(response => response.json())
             .then(data => setMenuItems(data.data));

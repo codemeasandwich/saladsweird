@@ -7,6 +7,7 @@ const ReportsPage = () => {
     const [month, setMonth] = useState('');
 
     useEffect(() => {
+        return;
         fetch('/api/reports')
             .then(response => response.json())
             .then(data => setReports(data.data));

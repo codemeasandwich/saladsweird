@@ -8,6 +8,7 @@ const IngredientsPage = () => {
     const [location, setLocation] = useState('');
 
     useEffect(() => {
+        return;
         fetch('/api/ingredients')
             .then(response => response.json())
             .then(data => setIngredients(data.data));
