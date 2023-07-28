@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 
-const IngredientSchema = new mongoose.Schema({
+const LocationSchema = new mongoose.Schema({
     name: {
         type: String,
         required: [true, 'Please add a name'],
@@ -13,6 +13,10 @@ const IngredientSchema = new mongoose.Schema({
         unique: true,
         trim: true
     },
+    staff: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Staff'
+    }],
     menu: [{
         recipe: {
             type: mongoose.Schema.Types.ObjectId,
@@ -31,4 +35,4 @@ const IngredientSchema = new mongoose.Schema({
     }]
 });
 
-module.exports = mongoose.models.Ingredient || mongoose.model('Ingredient', IngredientSchema);
+module.exports = mongoose.models.Location || mongoose.model('Location', LocationSchema);

@@ -9,12 +9,7 @@ const StaffSchema = new mongoose.Schema({
     dob: Date,
     role: String,
     iban: String,
-    bic: String,
-    location: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Location',
-        required: true
-    }
+    bic: String
 });
 
-module.exports = mongoose.models.Staff || mongoose.model('Staff', ReportSchema);
+module.exports = mongoose.models.Staff || mongoose.model('Staff', StaffSchema);
