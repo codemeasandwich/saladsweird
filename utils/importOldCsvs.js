@@ -1,32 +1,49 @@
 import csvs from '../old_csv';
-import models from '../../models';
-console.log(models)
-function importOldCsvs() {
+import models from '../models';
 
-    csvs().then(csvs => {
+function importOldCsvs() {
+    // Record the start time
+    var startTime = new Date();
+    console.log(" =========== STARTING DB BUILD OUT")
+    return csvs().then(csvs => {
 
         const lookup = Object.keys(csvs).reduce((all, key) => {
             all[key] = {}
             return all
         }, {})
 
+        //+++++++++++++++++++++++++++++++++++++++ create staff
+        //++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+        const staffGroupedBylocation = csvs.staff.reduce((staffGroupedBylocation, {
+            staff_id, name, dob, role, iban, bic, location_id
+        }) => {
+
+            const staffPayload = { name, dob, role, iban, bic }
+            lookup.staff[staff_id] = models.Staff.create(staffPayload)
+            staffGroupedBylocation[location_id] = staffGroupedBylocation[location_id] || []
+            staffGroupedBylocation[location_id].push(lookup.staff[staff_id])
+            return staffGroupedBylocation
+        }, {}) // END staff.forEach
+
+        //+++++++++++++++++++++++++++++++++++ create locations
+        //++++++++++++++++++++++++++++++++++++++++++++++++++++
+
         csvs.locations
             .forEach(({ location_id, name, address }) => {
-                lookup.locations[location_id] = models.Location.create({ name, address })
+                lookup.locations[location_id] = Promise.all(staffGroupedBylocation[location_id])
+                    .then(staff => models.Location.create({ name, address, staff }))
             })
 
-        csvs.staff.forEach(({ staff_id, name, dob, role, iban, bic, location_id }) => {
-
-            lookup.locations[location_id]
-                .then(locationDB => {
-                    const staffPayload = { name, dob, role, iban, bic, location: locationDB }
-                    lookup.staff[staff_id] = models.Staff.create(staffPayload)
-                }) // END then(locationDB
-        }) // END staff.forEach
+        //+++++++++++++++++++++++++++++++++ create ingredients
+        //++++++++++++++++++++++++++++++++++++++++++++++++++++
 
         csvs.ingredients.forEach(({ ingredient_id, name, unit, cost }) => {
-            lookup.ingredients[ingredient_id] = models.Location.create({ name, unit, cost })
+            lookup.ingredients[ingredient_id] = models.Ingredient.create({ name, unit: parseFloat(unit), cost: parseFloat(cost) })
         })
+
+        //+++++++++++++++++++++++++++++++++++++ create recipes
+        //++++++++++++++++++++++++++++++++++++++++++++++++++++
 
         const recipes = csvs.recipes.reduce((all, { recipe_id, name, quantity, ingredient_id }) => {
             all[recipe_id] = all[recipe_id] || { name, items: [] }
@@ -43,11 +60,15 @@ function importOldCsvs() {
                         lookup.recipes[recipe_id] = models.Recipe.create({
                             name: recipe.name,
                             items: recipe.items.map(({ quantity }, index) => ({
-                                quantity, ingredient: ingredientDBs[index]
+                                quantity: parseFloat(quantity),
+                                ingredient: ingredientDBs[index]
                             })) // END map 
                         }) // END create
                     })// END then
             })// END forEach
+
+        //+++++++++++++++++++++++++++ group recipes into menus
+        //++++++++++++++++++++++++++++++++++++++++++++++++++++
 
         const groupByLcations = csvs.menus.reduce((groupByLcation, { recipe_id, location_id, price, modifiers }) => {
             groupByLcation[location_id] = groupByLcation[location_id] || []
@@ -55,21 +76,50 @@ function importOldCsvs() {
             return groupByLcation
         }, {})
 
+        //+++++++++++++++++++++++++++++++ add menu to location
+        //++++++++++++++++++++++++++++++++++++++++++++++++++++
+
         Object.keys(groupByLcations)
             .forEach(location_id => {
                 const menuForLcation = groupByLcations[location_id];
+
+                console.log("menuForLcation", menuForLcation)
+
                 lookup.ingredients[ingredient_id]
                     .then(ingredientDB => {
-
                         return Promise.all(menuForLcation.map(({ recipe_id }) => recipes[recipe_id]))
                             .then(recipeDBs => {
                                 ingredientDB.menu = menuForLcation.map(({ price, modifiers }, index) => ({
-                                    price, extras: 1 == modifiers, recipe: recipeDBs[index]
+                                    price: parseFloat(price),
+                                    extras: 1 == modifiers,
+                                    recipe: recipeDBs[index]
                                 }))
                                 return ingredientDB.save()
                             }) // END then
                     })// END then
             }) // END forEach
+
+
+        //++++++++++++++++++++++++++++ wait for DB to be build
+        //++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+        return Object.keys(lookup).reduce((allProm, csvName) => {
+            const proms = Object.keys(lookup[csvName]).map(ids => lookup[csvName][ids])
+            return allProm.concat(proms)
+        }, []).then((ps) => {
+
+            // Calculate the elapsed time
+            var endTime = new Date();
+            var elapsedSeconds = (endTime - startTime) / 1000;
+
+            console.log();
+            console.log(" =========== FINNISHED DB BUILD OUT")
+            console.log(`Records:${ps.length}`);
+            console.log(`Elapsed time: ${elapsedSeconds} s`);
+            console.log();
+            return true
+        })
+
     }) // END csvs().then
 } // END importOldCsvs
 
