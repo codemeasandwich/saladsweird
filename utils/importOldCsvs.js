@@ -1,7 +1,16 @@
 import csvs from '../old_csv';
 import models from '../models';
 
+let importRunning = false
+
 function importOldCsvs() {
+
+    if (importRunning) {
+        console.log(" +++++++++++++ CSV import already running!!")
+        return
+    }
+    importRunning = true
+
     // Record the start time
     var startTime = new Date();
     console.log(" =========== STARTING DB BUILD OUT")
@@ -32,14 +41,23 @@ function importOldCsvs() {
         csvs.locations
             .forEach(({ location_id, name, address }) => {
                 lookup.locations[location_id] = Promise.all(staffGroupedBylocation[location_id])
-                    .then(staff => models.Location.create({ name, address, staff }))
+                    .then(staff => models.Location.create({
+                        name,
+                        address: address.replace('"', ''),
+                        staff,
+                        menu: []
+                    }))
             })
 
         //+++++++++++++++++++++++++++++++++ create ingredients
         //++++++++++++++++++++++++++++++++++++++++++++++++++++
 
         csvs.ingredients.forEach(({ ingredient_id, name, unit, cost }) => {
-            lookup.ingredients[ingredient_id] = models.Ingredient.create({ name, unit: parseFloat(unit), cost: parseFloat(cost) })
+            lookup.ingredients[ingredient_id] = models.Ingredient.create({
+                name,
+                unit,
+                cost: parseFloat(cost)
+            })
         })
 
         //+++++++++++++++++++++++++++++++++++++ create recipes
@@ -72,7 +90,7 @@ function importOldCsvs() {
 
         const groupByLcations = csvs.menus.reduce((groupByLcation, { recipe_id, location_id, price, modifiers }) => {
             groupByLcation[location_id] = groupByLcation[location_id] || []
-            groupByLcation[location_id].push(recipe_id, price, modifiers)
+            groupByLcation[location_id].push({ recipe_id, price, modifiers })
             return groupByLcation
         }, {})
 
@@ -82,19 +100,16 @@ function importOldCsvs() {
         Object.keys(groupByLcations)
             .forEach(location_id => {
                 const menuForLcation = groupByLcations[location_id];
-
-                console.log("menuForLcation", menuForLcation)
-
-                lookup.ingredients[ingredient_id]
-                    .then(ingredientDB => {
+                lookup.locations[location_id]
+                    .then(locationDB => {
                         return Promise.all(menuForLcation.map(({ recipe_id }) => recipes[recipe_id]))
                             .then(recipeDBs => {
-                                ingredientDB.menu = menuForLcation.map(({ price, modifiers }, index) => ({
+                                locationDB.menu = menuForLcation.map(({ price, modifiers }, index) => ({
                                     price: parseFloat(price),
                                     extras: 1 == modifiers,
                                     recipe: recipeDBs[index]
                                 }))
-                                return ingredientDB.save()
+                                return locationDB.save()
                             }) // END then
                     })// END then
             }) // END forEach
@@ -103,10 +118,10 @@ function importOldCsvs() {
         //++++++++++++++++++++++++++++ wait for DB to be build
         //++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-        return Object.keys(lookup).reduce((allProm, csvName) => {
+        return Promise.all(Object.keys(lookup).reduce((allProm, csvName) => {
             const proms = Object.keys(lookup[csvName]).map(ids => lookup[csvName][ids])
             return allProm.concat(proms)
-        }, []).then((ps) => {
+        }, [])).then((ps) => {
 
             // Calculate the elapsed time
             var endTime = new Date();
@@ -117,6 +132,8 @@ function importOldCsvs() {
             console.log(`Records:${ps.length}`);
             console.log(`Elapsed time: ${elapsedSeconds} s`);
             console.log();
+
+            importRunning = false
             return true
         })
 
