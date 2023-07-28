@@ -1,39 +1,30 @@
 import React from 'react';
-import Link from 'next/link';
-import { Container, Typography, Button, Grid } from '@mui/material';
+import { Box, Typography } from '@mui/material';
 
-const HomePage = () => {
+const AppLandingPage = () => {
     return (
-        <Container maxWidth="sm">
-            <Grid container spacing={3} direction="column" justifyContent="center" alignItems="center" style={{ minHeight: '100vh' }}>
-                <Grid item xs={12}>
-                    <Typography variant="h2" component="h1" gutterBottom>
-                        Welcome to Weird Salads Inventory System
-                    </Typography>
-                </Grid>
-                <Grid item xs={12}>
-                    <Button variant="contained" color="primary" component={Link} href="/ingredients">
-                        Manage Ingredients
-                    </Button>
-                </Grid>
-                <Grid item xs={12}>
-                    <Button variant="contained" color="primary" component={Link} href="/menuItems">
-                        Manage Menu Items
-                    </Button>
-                </Grid>
-                <Grid item xs={12}>
-                    <Button variant="contained" color="primary" component={Link} href="/inventoryMovements">
-                        Manage Inventory Movements
-                    </Button>
-                </Grid>
-                <Grid item xs={12}>
-                    <Button variant="contained" color="primary" component={Link} href="/reports">
-                        View Reports
-                    </Button>
-                </Grid>
-            </Grid>
-        </Container>
+        <Box
+            style={{
+                minHeight: '100vh',
+                backgroundImage: 'linear-gradient(to right, #ff5e62, #ff9966)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                textAlign: 'center'
+            }}
+        >
+            <Typography
+                variant="h2"
+                style={{
+                    color: 'white',
+                    textShadow: '2px 2px 4px #000000',
+                    fontWeight: 'bold'
+                }}
+            >
+                Welcome to the Super Inventory System
+            </Typography>
+        </Box>
     );
 };
 
-export default HomePage;
+export default AppLandingPage;
